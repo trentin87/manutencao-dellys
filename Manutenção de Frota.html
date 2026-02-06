@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Controle de Manutenção Delly's</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+    :root {
+        --aberto: #fee2e2; --aberto-text: #991b1b; --aberto-border: #ef4444;
+        --andamento: #fef9c3; --andamento-text: #854d0e; --andamento-border: #eab308;
+        --aguardando: #ffedd5; --aguardando-text: #9a3412; --aguardando-border: #f97316;
+        --finalizado: #dcfce7; --finalizado-text: #166534; --finalizado-border: #22c55e;
+        --header-bg: #003366; 
+        --btn-add-bg: #059669; --btn-add-hover: #047857;
+        --btn-pdf: #dc2626; --btn-pdf-hover: #b91c1c;
+        --btn-xls: #15803d; --btn-xls-hover: #166534;
+        --zebra-bg: #e2e8f0;
+    }
+
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f1f5f9; color: #333; font-size: 11px; }
+    
+    header { 
+        background: var(--header-bg); 
+        color: white; padding: 15px 25px; 
+        display: flex; justify-content: space-between; align-items: center; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .header-title { font-size: 22px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
+    .truck-icon { width: 32px; height: 32px; fill: currentColor; }
+    .logo-img { height: 35px; filter: brightness(0) invert(1); }
+    
+    .dashboard { display: flex; background: #fff; border-bottom: 1px solid #cbd5e1; padding: 5px 0; }
+    .dash-card { flex: 1; text-align: center; border-right: 1px solid #eee; padding: 5px; }
+    .dash-card .label { font-size: 9px; font-weight: bold; color: #64748b; display: block; }
+    .dash-card .val { font-size: 16px; font-weight: 900; }
+
+    .filter-bar { background: #fff; padding: 10px 20px; display: flex; gap: 8px; border-bottom: 1px solid #cbd5e1; align-items: center; }
+    .filter-bar.disabled { opacity: 0.4; pointer-events: none; background: #f1f5f9; }
+
+    .btn-fx {
+        border: none; cursor: pointer; font-weight: bold; border-radius: 4px;
+        transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-transform: uppercase; display: flex; align-items: center; justify-content: center;
+    }
+    .btn-fx:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); filter: brightness(1.1); }
+    .btn-fx:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+    .btn-filter { padding: 6px 12px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; }
+    .btn-filter.active { background: var(--header-bg); color: white; border-color: var(--header-bg); }
+    
+    .btn-add { background: var(--btn-add-bg); color: white; padding: 9px 20px; font-weight: 900; }
+    .btn-pdf-relatorio { background: var(--btn-pdf); color: white; padding: 6px 12px; font-size: 10px; height: 30px; }
+    .btn-excel { background: var(--btn-xls); color: white; padding: 6px 12px; font-size: 10px; height: 30px; }
+    
+    .btn-nav { padding: 8px 15px; border: 1px solid #94a3b8; background: #f8fafc; color: #1e293b; }
+    .btn-nav.active { background: var(--header-bg); color: white; border-color: var(--header-bg); }
+
+    .toolbar { background: #cbd5e1; padding: 10px 20px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #94a3b8; }
+    
+    .content-area { padding: 12px; }
+    .table-container { background: #fff; border: 1px solid #94a3b8; overflow-x: auto; min-height: 450px; border-radius: 4px; }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #1e293b; border: 1px solid #0f172a; padding: 10px 8px; font-size: 10px; color: #fff; position: sticky; top: 0; z-index: 10; text-transform: uppercase; }
+    td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; text-transform: uppercase; font-size: 10px; vertical-align: middle; }
+    
+    tbody tr:nth-child(even) { background-color: var(--zebra-bg); }
+    tbody tr:hover { background-color: #cbd5e1 !important; }
+
+    .cell-ABERTO { background-color: var(--aberto) !important; color: var(--aberto-text); font-weight: 900; border-left: 6px solid var(--aberto-border) !important; }
+    .cell-EM-ANDAMENTO { background-color: var(--andamento) !important; color: var(--andamento-text); font-weight: 900; border-left: 6px solid var(--andamento-border) !important; }
+    .cell-AGUARDANDO-PEÇA { background-color: var(--aguardando) !important; color: var(--aguardando-text); font-weight: 900; border-left: 6px solid var(--aguardando-border) !important; }
+    .cell-FINALIZADO { background-color: var(--finalizado) !important; color: var(--finalizado-text); font-weight: 900; border-left: 6px solid var(--finalizado-border) !important; }
+
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 15px; background: #fff; border-top: 1px solid #cbd5e1; }
+    .btn-pag { padding: 6px 12px; border: 1px solid #94a3b8; background: #fff; font-weight: bold; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+    .btn-pag:hover:not(:disabled) { background: var(--header-bg); color: white; }
+    .btn-pag:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+
+    #modalOS { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; }
+    .modal-box { background: white; padding: 25px; border-radius: 8px; width: 450px; }
+    .modal-box input, .modal-box select, .modal-box textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #cbd5e1; text-transform: uppercase; box-sizing: border-box; border-radius: 4px; }
+
+    .wrap-text { white-space: normal !important; text-align: left !important; min-width: 220px; line-height: 1.4; }
+    .grid-input { width: 100%; border: none; background: transparent; font-size: 10px; padding: 4px; text-transform: uppercase; outline: none; text-align: center; font-weight: bold; }
+    .grid-textarea { width: 100%; border: none; background: transparent; font-size: 10px; padding: 4px; text-transform: uppercase; outline: none; resize: none; font-family: inherit; overflow: hidden; display: block; text-align: left; }
+    .grid-input:disabled, .grid-textarea:disabled { color: #444; opacity: 1; cursor: default; }
+
+    #toast { position: fixed; top: 20px; right: 20px; background: #059669; color: white; padding: 12px 24px; border-radius: 4px; font-weight: bold; display: none; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div id="toast">OS ENCERRADA COM SUCESSO!</div>
+
+<header>
+    <div class="header-title">
+        <svg class="truck-icon" viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM17 12V9.5h2.5l1.97 2.5H17z"/></svg>
+        CONTROLE DE MANUTENÇÃO
+    </div>
+    <img id="logoDellys" src="https://www.dellys.com.br/ccstore/v1/images/?source=/file/v4051494612781080437/general/Logo_10_png.png" class="logo-img">
+</header>
+
+<div class="dashboard">
+    <div class="dash-card"><span class="label">TOTAL NO PERÍODO</span><span class="val" id="countTotal">0</span></div>
+    <div class="dash-card"><span class="label">ABERTOS</span><span class="val" id="countAberto" style="color:#ef4444">0</span></div>
+    <div class="dash-card"><span class="label">EM ANDAMENTO</span><span class="val" id="countAndamento" style="color:#eab308">0</span></div>
+    <div class="dash-card"><span class="label">AGUARDANDO PEÇA</span><span class="val" id="countAguardando" style="color:#f97316">0</span></div>
+    <div class="dash-card"><span class="label">FINALIZADOS</span><span class="val" id="countFinalizado" style="color:#22c55e">0</span></div>
+</div>
+
+<div class="filter-bar" id="filterBar">
+    <button class="btn-fx btn-filter active" data-status="TODOS" onclick="setFiltroStatus('TODOS')">TODOS</button>
+    <button class="btn-fx btn-filter" data-status="ABERTO" onclick="setFiltroStatus('ABERTO')">ABERTO</button>
+    <button class="btn-fx btn-filter" data-status="EM ANDAMENTO" onclick="setFiltroStatus('EM ANDAMENTO')">EM ANDAMENTO</button>
+    <button class="btn-fx btn-filter" data-status="AGUARDANDO PEÇA" onclick="setFiltroStatus('AGUARDANDO PEÇA')">AGUARDANDO PEÇA</button>
+    <button class="btn-fx btn-filter" data-status="FINALIZADO" onclick="setFiltroStatus('FINALIZADO')">FINALIZADO</button>
+
+    <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+        <select id="filtroPeriodo" onchange="atualizarInterface()" style="padding: 6px; font-weight: bold; height: 32px; border-radius:4px; border:1px solid #cbd5e1; cursor:pointer;">
+            <option value="7">ÚLTIMOS 7 DIAS</option>
+            <option value="15">ÚLTIMOS 15 DIAS</option>
+            <option value="30" selected>ÚLTIMOS 30 DIAS</option>
+            <option value="90">ÚLTIMOS 90 DIAS</option>
+            <option value="0">TUDO (HISTÓRICO)</option>
+        </select>
+        <button class="btn-fx btn-excel" onclick="gerarExcel()">EXCEL</button>
+        <button class="btn-fx btn-pdf-relatorio" onclick="gerarRelatorioPDF()">PDF</button>
+    </div>
+</div>
+
+<div class="toolbar">
+    <button class="btn-fx btn-add" onclick="abrirModal()">+ ABRIR CHAMADO</button>
+    <button id="nav-consulta" class="btn-fx btn-nav active" onclick="tela('consulta')">CONSULTA GERAL</button>
+    <button id="nav-editar" class="btn-fx btn-nav" onclick="tela('editar')">MODO OFICINA</button>
+    <input id="txt-search" placeholder="BUSCAR PLACA OU MOTORISTA..." onkeyup="filtrarTudoInstantaneo()" style="padding: 9px; width: 250px; border: 1px solid #94a3b8; border-radius: 4px; margin-left: auto;">
+</div>
+
+<div class="content-area">
+    <div id="consulta" class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px">OS</th><th style="width:110px">DATA/HORA</th><th style="width:80px">PLACA</th><th style="width:120px">MOTORISTA</th><th style="width:50px">KM</th><th style="width:90px">SERVIÇO</th><th style="width:120px">STATUS</th><th>PROBLEMA</th><th style="width:120px">RESPONSÁVEL</th><th>OBSERVAÇÕES</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyConsulta"></tbody>
+        </table>
+    </div>
+
+    <div id="editar" class="table-container hidden">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px">OS</th><th style="width:110px">DATA/HORA</th><th style="width:80px">PLACA</th><th style="width:120px">MOTORISTA</th><th style="width:50px">KM</th><th style="width:90px">SERVIÇO</th><th style="width:120px">STATUS</th><th>PROBLEMA</th><th style="width:120px">RESPONSÁVEL</th><th>OBSERVAÇÕES</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyOficina"></tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <button class="btn-pag" onclick="paginar('first')">|◀</button>
+        <button class="btn-pag" onclick="paginar('prev')">ANTERIOR</button>
+        <span id="pageInfo" style="font-weight: 900; margin: 0 15px; color:#1e293b">PÁGINA 1 DE 1</span>
+        <button class="btn-pag" onclick="paginar('next')">PRÓXIMA</button>
+        <button class="btn-pag" onclick="paginar('last')">▶|</button>
+    </div>
+</div>
+
+<div id="modalOS">
+    <div class="modal-box">
+        <form id="formOS">
+            <h3 style="margin-top:0; border-bottom: 2px solid var(--btn-add-bg); padding-bottom: 8px; color: var(--btn-add-bg)">Novo Registro de OS</h3>
+            <input id="placa" placeholder="PLACA" required>
+            <input id="motorista" placeholder="MOTORISTA" required>
+            <input id="km" type="number" placeholder="KM ATUAL">
+            <select id="tipoServico">
+                <option value="MECÂNICO">MECÂNICO</option>
+                <option value="ELÉTRICO">ELÉTRICO</option>
+                <option value="REFRIGERAÇÃO">REFRIGERAÇÃO</option>
+                <option value="LAVAGEM">LAVAGEM</option>
+                <option value="OUTROS">OUTROS</option>
+            </select>
+            <textarea id="problema" placeholder="DESCREVA O PROBLEMA..." rows="3"></textarea>
+            <button id="btnSalvar" type="button" class="btn-fx btn-add" style="width:100%; font-size: 14px; padding: 12px; margin-top:10px" onclick="salvar()">GRAVAR CHAMADO</button>
+            <button type="button" style="width:100%; margin-top:10px; border:none; background:transparent; color:#64748b; cursor:pointer;" onclick="fecharModal()">CANCELAR</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbyUE0CNezRlM0rfYQdDgxn-HUmmnkJJWM6Xz_RiQJ615AHtGI5Hhz9XAJAePhW6sKIOtQ/exec";
+let banco = [];
+let filtroStatusAtivo = 'TODOS';
+let telaAtiva = 'consulta';
+let paginaAtual = 1;
+const itensPorPagina = 50;
+
+window.onload = () => buscarDados();
+
+async function buscarDados() {
+    try {
+        const res = await fetch(URL_GOOGLE);
+        const json = await res.json();
+        banco = json.map(x => ({
+            numero: x.numero || Object.values(x)[0],
+            data: x.data || Object.values(x)[1],
+            placa: (x.placa || Object.values(x)[2] || "").toString().toUpperCase(),
+            motorista: (x.motorista || Object.values(x)[3] || "").toString().toUpperCase(),
+            km: x.km || Object.values(x)[4] || "-",
+            tipo: (x.tipo || Object.values(x)[5] || "OUTROS").toString().toUpperCase(),
+            problema: (x.problema || Object.values(x)[6] || "").toString().toUpperCase(),
+            status: (x.status || Object.values(x)[7] || "ABERTO").toString().toUpperCase(),
+            responsavel: (x.responsavel || Object.values(x)[8] || "").toString().toUpperCase(),
+            obs: (x.obs || Object.values(x)[9] || "").toString().toUpperCase()
+        }));
+        atualizarInterface();
+    } catch (e) { console.error("Erro na carga"); }
+}
+
+function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.innerText = msg || "OS ENCERRADA COM SUCESSO!";
+    t.style.display = "block";
+    setTimeout(() => { t.style.display = "none"; }, 3000);
+}
+
+function getDadosPorPeriodo() {
+    const dias = parseInt(document.getElementById("filtroPeriodo").value);
+    const agora = new Date();
+    if (dias === 0) return banco;
+    return banco.filter(x => {
+        const diff = (agora - new Date(x.data)) / (1000 * 60 * 60 * 24);
+        return diff <= dias;
+    });
+}
+
+function getDadosFiltrados() {
+    const busca = document.getElementById("txt-search").value.toLowerCase();
+    let dados = getDadosPorPeriodo();
+    
+    if (telaAtiva === 'editar') { 
+        dados = dados.filter(x => x.status !== 'FINALIZADO'); 
+    } else { 
+        if (filtroStatusAtivo !== 'TODOS') dados = dados.filter(x => x.status === filtroStatusAtivo); 
+    }
+    
+    return dados.filter(x => x.placa.toLowerCase().includes(busca) || x.motorista.toLowerCase().includes(busca)).reverse();
+}
+
+function atualizarInterface() {
+    const dadosPeriodo = getDadosPorPeriodo();
+    const c = { 'ABERTO':0, 'EM ANDAMENTO':0, 'AGUARDANDO PEÇA':0, 'FINALIZADO':0 };
+    dadosPeriodo.forEach(x => { if(c.hasOwnProperty(x.status)) c[x.status]++; });
+    document.getElementById('countTotal').innerText = dadosPeriodo.length;
+    document.getElementById('countAberto').innerText = c['ABERTO'];
+    document.getElementById('countAndamento').innerText = c['EM ANDAMENTO'];
+    document.getElementById('countAguardando').innerText = c['AGUARDANDO PEÇA'];
+    document.getElementById('countFinalizado').innerText = c['FINALIZADO'];
+
+    const fBar = document.getElementById("filterBar");
+    if (telaAtiva === 'editar') fBar.classList.add('disabled'); else fBar.classList.remove('disabled');
+
+    filtrarTudoInstantaneo();
+}
+
+function filtrarTudoInstantaneo() { renderTables(getDadosFiltrados()); }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+function renderTables(dados) {
+    const totalP = Math.ceil(dados.length / itensPorPagina) || 1;
+    if (paginaAtual > totalP) paginaAtual = totalP;
+    const paginados = dados.slice((paginaAtual-1)*itensPorPagina, paginaAtual*itensPorPagina);
+    document.getElementById("pageInfo").innerText = `PÁGINA ${paginaAtual} DE ${totalP}`;
+
+    const tbC = document.getElementById("tbodyConsulta");
+    const tbO = document.getElementById("tbodyOficina");
+
+    tbC.innerHTML = "";
+    tbO.innerHTML = "";
+
+    if (telaAtiva === 'consulta') {
+        tbC.innerHTML = paginados.map(x => `
+            <tr>
+                <td>${x.numero}</td><td>${new Date(x.data).toLocaleString('pt-BR')}</td>
+                <td><b>${x.placa}</b></td><td>${x.motorista}</td><td>${x.km}</td><td>${x.tipo}</td>
+                <td class="cell-${x.status.replace(/\s/g, "-")}">${x.status}</td>
+                <td class="wrap-text">${x.problema}</td><td>${x.responsavel}</td><td class="wrap-text">${x.obs}</td>
+            </tr>`).join('');
+    } else {
+        tbO.innerHTML = paginados.map(x => `
+            <tr id="linha-${x.numero}">
+                <td>${x.numero}</td><td>${new Date(x.data).toLocaleString('pt-BR')}</td>
+                <td><b>${x.placa}</b></td><td>${x.motorista}</td><td>${x.km}</td><td>${x.tipo}</td>
+                <td class="cell-${x.status.replace(/\s/g, "-")}" style="padding:0">
+                    <select class="grid-input" onchange="atualizarStatus(${x.numero}, this)">
+                        <option value="ABERTO" ${x.status==='ABERTO'?'selected':''}>ABERTO</option>
+                        <option value="EM ANDAMENTO" ${x.status==='EM ANDAMENTO'?'selected':''}>EM ANDAMENTO</option>
+                        <option value="AGUARDANDO PEÇA" ${x.status==='AGUARDANDO PEÇA'?'selected':''}>AGUARDANDO PEÇA</option>
+                        <option value="FINALIZADO" ${x.status==='FINALIZADO'?'selected':''}>FINALIZADO</option>
+                    </select>
+                </td>
+                <td class="wrap-text">${x.problema}</td>
+                <td style="padding:0">
+                    <input class="grid-input" value="${x.responsavel}" onchange="atualizarCampo(${x.numero}, 'responsavel', this.value)">
+                </td>
+                <td class="wrap-text" style="padding:0">
+                    <textarea class="grid-textarea" oninput="autoResize(this)" onchange="atualizarCampo(${x.numero}, 'obs', this.value)">${x.obs}</textarea>
+                </td>
+            </tr>`).join('');
+        document.querySelectorAll('.grid-textarea').forEach(tx => autoResize(tx));
+    }
+}
+
+async function atualizarStatus(num, el) {
+    const val = el.value.toUpperCase();
+    
+    if(val === 'FINALIZADO') {
+        if(!confirm("Deseja FINALIZAR a OS #" + num + "?")) { 
+            buscarDados(); 
+            return; 
+        }
+        const tr = document.getElementById("linha-" + num);
+        if(tr) {
+            tr.querySelectorAll('select, input, textarea').forEach(c => c.disabled = true);
+            tr.style.opacity = '0.4';
+        }
+    }
+    
+    const index = banco.findIndex(x => x.numero == num);
+    if(index !== -1) banco[index].status = val;
+    
+    if(val === 'FINALIZADO') {
+        setTimeout(() => {
+            filtrarTudoInstantaneo();
+            atualizarInterface();
+        }, 500);
+    }
+
+    try {
+        await fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify({ action: "update", numero: num, status: val }) });
+        showToast();
+    } catch(e) {
+        alert("Erro ao salvar status.");
+        buscarDados();
+    }
+}
+
+async function atualizarCampo(num, campo, valor) {
+    const item = banco.find(x => x.numero == num);
+    if(item) item[campo] = valor.toUpperCase();
+
+    try {
+        await fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify({ action: "update", numero: num, [campo]: valor.toUpperCase() }) });
+        showToast("CAMPO ATUALIZADO");
+    } catch(e) {
+        console.error("Erro ao salvar campo");
+    }
+}
+
+async function salvar() {
+    const p = document.getElementById("placa").value.trim();
+    const m = document.getElementById("motorista").value.trim();
+    if(!p || !m) return alert("Preencha placa e motorista!");
+    
+    const btn = document.getElementById("btnSalvar");
+    btn.disabled = true; btn.innerText = "GRAVANDO...";
+
+    const obj = { data: new Date().toISOString(), placa: p.toUpperCase(), motorista: m.toUpperCase(), km: document.getElementById("km").value, tipo: document.getElementById("tipoServico").value, problema: document.getElementById("problema").value.toUpperCase(), status: "ABERTO", responsavel: "", obs: "" };
+    
+    try {
+        await fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(obj) });
+        fecharModal();
+        buscarDados();
+    } catch(e) {
+        alert("Erro ao criar OS");
+    } finally {
+        btn.disabled = false; btn.innerText = "GRAVAR CHAMADO";
+    }
+}
+
+function setFiltroStatus(st) {
+    if (telaAtiva === 'editar') return;
+    filtroStatusAtivo = st;
+    document.querySelectorAll('.btn-filter').forEach(b => b.classList.toggle('active', b.getAttribute('data-status') === st));
+    paginaAtual = 1; atualizarInterface();
+}
+
+function tela(id) {
+    telaAtiva = id;
+    document.querySelectorAll('.table-container').forEach(t => t.classList.add('hidden'));
+    document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.remove('hidden');
+    document.getElementById('nav-' + id).classList.add('active');
+    paginaAtual = 1; 
+    atualizarInterface();
+}
+
+function gerarExcel() {
+    const ws = XLSX.utils.json_to_sheet(getDadosFiltrados());
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Dados");
+    XLSX.writeFile(wb, `Planilha_Manutencao.xlsx`);
+}
+
+function gerarRelatorioPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'mm', 'a4');
+    doc.setFillColor(0, 51, 102); doc.rect(0, 0, 297, 25, 'F');
+    doc.setTextColor(255, 255, 255); doc.text("SISTEMA DE MANUTENÇÃO - RELATÓRIO", 15, 15);
+    const rows = getDadosFiltrados().map(x => [x.numero, new Date(x.data).toLocaleDateString('pt-BR'), x.placa, x.motorista, x.km, x.status, x.problema, x.responsavel, x.obs]);
+    doc.autoTable({ startY: 30, head: [['OS', 'DATA', 'PLACA', 'MOTORISTA', 'KM', 'STATUS', 'PROBLEMA', 'RESPONSÁVEL', 'OBSERVAÇÕES']], body: rows });
+    doc.save(`Relatorio_Frota.pdf`);
+}
+
+function paginar(acao) {
+    const totalP = Math.ceil(getDadosFiltrados().length / itensPorPagina) || 1;
+    if (acao === 'first') paginaAtual = 1;
+    else if (acao === 'prev' && paginaAtual > 1) paginaAtual--;
+    else if (acao === 'next' && paginaAtual < totalP) paginaAtual++;
+    else if (acao === 'last') paginaAtual = totalP;
+    renderTables(getDadosFiltrados());
+}
+
+function abrirModal() { 
+    document.getElementById("formOS").reset();
+    document.getElementById('modalOS').style.display = 'flex'; 
+}
+function fecharModal() { document.getElementById('modalOS').style.display = 'none'; }
+setInterval(buscarDados, 120000);
+</script>
+</body>
+</html>
