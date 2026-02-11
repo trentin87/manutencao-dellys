@@ -402,20 +402,31 @@ function paginar(acao) {
     filtrarTudoInstantaneo(); 
 }
 
-function abrirModal() { document.getElementById('modalOS').style.display = 'flex'; }
-function fecharModal() { document.getElementById('modalOS').style.display = 'none'; }
+function abrirModal() { 
+    // Limpa os campos antes de abrir para não carregar info anterior
+    document.getElementById("placa").value = "";
+    document.getElementById("motorista").value = "";
+    document.getElementById("km").value = "";
+    document.getElementById("problema").value = "";
+    document.getElementById("tipoServico").selectedIndex = 0;
+    document.getElementById('modalOS').style.display = 'flex'; 
+}
+
+function fecharModal() { 
+    document.getElementById('modalOS').style.display = 'none'; 
+}
+
 function showToast() { const t = document.getElementById("toast"); t.style.display="block"; setTimeout(()=>t.style.display="none", 2000); }
 
-// --- FUNÇÃO DE SINCRONISMO AUTOMÁTICO ADICIONADA ---
+// --- FUNÇÃO DE SINCRONISMO AUTOMÁTICO ---
 setInterval(() => {
     const busca = document.getElementById("txt-search");
     const modal = document.getElementById("modalOS");
     
-    // Só sincroniza se o usuário não estiver digitando na busca e não estiver com o modal aberto
     if (document.activeElement !== busca && modal.style.display !== "flex") {
         buscarDados();
     }
-}, 30000); // Atualiza a cada 30 segundos
+}, 30000); 
 </script>
 </body>
 </html>
