@@ -56,18 +56,19 @@
         -webkit-overflow-scrolling: touch;
     }
     
-    table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1300px; } 
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1300px; }
     
-    th:nth-child(1), td:nth-child(1) { width: 40px; }  
-    th:nth-child(2), td:nth-child(2) { width: 110px; } 
-    th:nth-child(3), td:nth-child(3) { width: 80px; }  
-    th:nth-child(4), td:nth-child(4) { width: 120px; } 
-    th:nth-child(5), td:nth-child(5) { width: 70px; }  
-    th:nth-child(6), td:nth-child(6) { width: 110px; } 
-    th:nth-child(7), td:nth-child(7) { width: 250px; } 
-    th:nth-child(8), td:nth-child(8) { width: 130px; } 
-    th:nth-child(9), td:nth-child(9) { width: 150px; } 
-    th:nth-child(10), td:nth-child(10) { width: 250px; }
+    /* AQUI VOCÊ AJUSTA AS LARGURAS */
+    th:nth-child(1), td:nth-child(1) { width: 25px; }  /* OS */
+    th:nth-child(2), td:nth-child(2) { width: 85px; } /* DATA/HORA */
+    th:nth-child(3), td:nth-child(3) { width: 50px; }  /* PLACA */
+    th:nth-child(4), td:nth-child(4) { width: 90px; } /* MOTORISTA */
+    th:nth-child(5), td:nth-child(5) { width: 35px; }  /* KM */
+    th:nth-child(6), td:nth-child(6) { width: 90px; } /* SERVIÇO */
+    th:nth-child(7), td:nth-child(7) { width: 250px; } /* PROBLEMA */
+    th:nth-child(8), td:nth-child(8) { width: 100px; } /* RESPONSÁVEL */
+    th:nth-child(9), td:nth-child(9) { width: 250px; } /* OBSERVAÇÕES */
+    th:nth-child(10), td:nth-child(10) { width: 90px; }/* STATUS (ÚLTIMA COLUNA) */
 
     th { background: #1e293b; border: 1px solid #0f172a; padding: 10px 12px; font-size: 10px; color: #fff; position: sticky; top: 0; z-index: 10; text-transform: uppercase; white-space: nowrap; }
     td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; text-transform: uppercase; font-size: 10px; vertical-align: middle; overflow: hidden; }
@@ -83,7 +84,6 @@
         cursor: pointer;
         width: 100%;
     }
-
     .wrap-text:hover {
         max-height: 500px; 
         overflow: visible;
@@ -99,12 +99,14 @@
     .serv-REFRIGERAÇÃO { background-color: #dbeafe !important; color: #1e40af; font-weight: bold; border-left: 6px solid #3b82f6 !important; }
     .serv-LAVAGEM { background-color: #f3e8ff !important; color: #6b21a8; font-weight: bold; border-left: 6px solid #a855f7 !important; }
     .serv-OUTROS { background-color: #f4f4f5 !important; color: #3f3f46; font-weight: bold; border-left: 6px solid #71717a !important; }
+
     .cell-ABERTO { background-color: var(--aberto) !important; color: var(--aberto-text); font-weight: 900; border-left: 6px solid var(--aberto-border) !important; }
     .cell-EM-ANDAMENTO { background-color: var(--andamento) !important; color: var(--andamento-text); font-weight: 900; border-left: 6px solid var(--andamento-border) !important; }
     .cell-AGUARDANDO-PEÇA { background-color: var(--aguardando) !important; color: var(--aguardando-text); font-weight: 900; border-left: 6px solid var(--aguardando-border) !important; }
     .cell-FINALIZADO { background-color: var(--finalizado) !important; color: var(--finalizado-text); font-weight: 900; border-left: 6px solid var(--finalizado-border) !important; }
 
     .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 15px; background: #fff; border-top: 1px solid #cbd5e1; flex-wrap: wrap; }
+    
     .grid-input { width: 100%; border: none; background: transparent; font-size: 10px; padding: 4px; text-transform: uppercase; outline: none; text-align: center; font-weight: bold; box-sizing: border-box; }
     
     .grid-textarea { 
@@ -159,6 +161,7 @@
     <button class="btn-fx btn-filter" data-status="EM ANDAMENTO" onclick="setFiltroStatus('EM ANDAMENTO')">EM ANDAMENTO</button>
     <button class="btn-fx btn-filter" data-status="AGUARDANDO PEÇA" onclick="setFiltroStatus('AGUARDANDO PEÇA')">AGUARDANDO PEÇA</button>
     <button class="btn-fx btn-filter" data-status="FINALIZADO" onclick="setFiltroStatus('FINALIZADO')">FINALIZADO</button>
+    
     <div style="margin-left: auto; display: flex; gap: 8px;">
         <select id="filtroPeriodo" onchange="atualizarInterface()" style="padding: 6px; font-weight: bold; border-radius:4px; border:1px solid #cbd5e1; cursor: pointer;">
             <option value="7" selected>ÚLTIMOS 7 DIAS</option>
@@ -186,23 +189,25 @@
             <thead>
                 <tr>
                     <th>OS</th><th>DATA/HORA</th><th>PLACA</th><th>MOTORISTA</th><th>KM</th><th>SERVIÇO</th>
-                    <th>PROBLEMA</th><th>STATUS</th><th>RESPONSÁVEL</th><th>OBSERVAÇÕES</th>
+                    <th>PROBLEMA</th><th>RESPONSÁVEL</th><th>OBSERVAÇÕES</th><th>STATUS</th>
                 </tr>
             </thead>
             <tbody id="tbodyConsulta"></tbody>
         </table>
     </div>
+
     <div id="editar" class="table-container hidden">
         <table>
             <thead>
                 <tr>
                     <th>OS</th><th>DATA/HORA</th><th>PLACA</th><th>MOTORISTA</th><th>KM</th><th>SERVIÇO</th>
-                    <th>PROBLEMA</th><th>STATUS</th><th>RESPONSÁVEL</th><th>OBSERVAÇÕES</th>
+                    <th>PROBLEMA</th><th>RESPONSÁVEL</th><th>OBSERVAÇÕES</th><th>STATUS</th>
                 </tr>
             </thead>
             <tbody id="tbodyOficina"></tbody>
         </table>
     </div>
+
     <div class="pagination">
         <button class="btn-pag btn-fx" onclick="paginar('first')">|◀</button>
         <button class="btn-pag btn-fx" onclick="paginar('prev')">ANTERIOR</button>
@@ -255,7 +260,8 @@ async function buscarDados() {
             problema: (x.problema || Object.values(x)[6] || "").toString().toUpperCase(),
             status: (x.status || Object.values(x)[7] || "ABERTO").toString().toUpperCase(),
             responsavel: (x.responsavel || Object.values(x)[8] || "").toString().toUpperCase(),
-            obs: (x.obs || Object.values(x)[9] || "").toString().toUpperCase()
+            obs: (x.obs || Object.values(x)[9] || "").toString().toUpperCase(),
+            conclusao: x.conclusao || Object.values(x)[10] || ""
         }));
         atualizarInterface();
     } catch (e) { console.error("Erro na carga"); }
@@ -270,6 +276,7 @@ function atualizarInterface() {
     document.getElementById('countAndamento').innerText = c['EM ANDAMENTO'];
     document.getElementById('countAguardando').innerText = c['AGUARDANDO PEÇA'];
     document.getElementById('countFinalizado').innerText = c['FINALIZADO'];
+    
     document.body.classList.toggle('modo-oficina-active', telaAtiva === 'editar');
     filtrarTudoInstantaneo();
 }
@@ -299,26 +306,23 @@ function renderTables(dados) {
     const tbC = document.getElementById("tbodyConsulta");
     const tbO = document.getElementById("tbodyOficina");
 
-    if (isOficina && dados.length === 0) {
-        tbO.innerHTML = `<tr><td colspan="10" style="padding:40px; text-align:center; font-weight:bold; color:#64748b;">NÃO HÁ CHAMADOS PENDENTES NA OFICINA.</td></tr>`;
-        return;
-    }
-
     const totalP = isOficina ? 1 : (Math.ceil(dados.length / itensPorPagina) || 1);
     const paginados = isOficina ? dados : dados.slice((paginaAtual-1)*itensPorPagina, paginaAtual*itensPorPagina);
     document.getElementById("pageInfo").innerText = `PÁGINA ${paginaAtual} DE ${totalP}`;
     tbC.innerHTML = ""; tbO.innerHTML = "";
 
     if (telaAtiva === 'consulta') {
-        tbC.innerHTML = paginados.map(x => `
-            <tr>
+        tbC.innerHTML = paginados.map(x => {
+            const balao = x.status === 'FINALIZADO' && x.conclusao ? `title="FINALIZADO EM: ${new Date(x.conclusao).toLocaleString('pt-BR')}"` : '';
+            return `<tr>
                 <td>${x.numero}</td><td>${new Date(x.data).toLocaleString('pt-BR')}</td>
-                <td><b>${x.placa}</b></td><td><div class="wrap-text" title="Passe o mouse para ver tudo">${x.motorista}</div></td><td>${x.km}</td>
+                <td><b>${x.placa}</b></td><td><div class="wrap-text">${x.motorista}</div></td><td>${x.km}</td>
                 <td class="serv-${x.tipo.replace(/\s/g, "-")}">${x.tipo}</td>
-                <td><div class="wrap-text" title="Passe o mouse para ver tudo">${x.problema}</div></td>
-                <td class="cell-${x.status.replace(/\s/g, "-")}">${x.status}</td>
-                <td><div class="wrap-text" title="Passe o mouse para ver tudo">${x.responsavel}</div></td><td><div class="wrap-text" title="Passe o mouse para ver tudo">${x.obs}</div></td>
-            </tr>`).join('');
+                <td><div class="wrap-text">${x.problema}</div></td>
+                <td><div class="wrap-text">${x.responsavel}</div></td>
+                <td><div class="wrap-text">${x.obs}</div></td>
+                <td class="cell-${x.status.replace(/\s/g, "-")}" ${balao}>${x.status}</td>
+            </tr>`}).join('');
     } else {
         tbO.innerHTML = paginados.map(x => `
             <tr>
@@ -334,26 +338,27 @@ function renderTables(dados) {
                     </select>
                 </td>
                 <td><div class="wrap-text">${x.problema}</div></td>
+                <td style="padding:0"><textarea class="grid-textarea" onchange="atualizarCampo(${x.numero}, 'responsavel', this.value)">${x.responsavel}</textarea></td>
+                <td style="padding:0"><textarea class="grid-textarea" onchange="atualizarCampo(${x.numero}, 'obs', this.value)">${x.obs}</textarea></td>
                 <td class="cell-${x.status.replace(/\s/g, "-")}" style="padding:0">
-                    <select class="grid-input" onchange="confirmarStatus(${x.numero}, this, '${x.status}')">
+                    <select class="grid-input" onchange="confirmarStatus(this, ${x.numero}, '${x.status}')">
                         <option value="ABERTO" ${x.status==='ABERTO'?'selected':''}>ABERTO</option>
                         <option value="EM ANDAMENTO" ${x.status==='EM ANDAMENTO'?'selected':''}>EM ANDAMENTO</option>
                         <option value="AGUARDANDO PEÇA" ${x.status==='AGUARDANDO PEÇA'?'selected':''}>AGUARDANDO PEÇA</option>
                         <option value="FINALIZADO" ${x.status==='FINALIZADO'?'selected':''}>FINALIZADO</option>
                     </select>
                 </td>
-                <td style="padding:0"><textarea class="grid-textarea" onchange="atualizarCampo(${x.numero}, 'responsavel', this.value)">${x.responsavel}</textarea></td>
-                <td style="padding:0"><textarea class="grid-textarea" onchange="atualizarCampo(${x.numero}, 'obs', this.value)">${x.obs}</textarea></td>
             </tr>`).join('');
     }
 }
 
-function confirmarStatus(num, el, statusAnterior) {
+function confirmarStatus(el, num, statusAnterior) {
     if (el.value === "FINALIZADO") {
         if (!confirm("REALMENTE DESEJA FINALIZAR ESTA OS? ELA SAIRÁ DA TELA DA OFICINA.")) {
             el.value = statusAnterior;
             return;
         }
+        atualizarCampo(num, 'conclusao', new Date().toISOString());
     }
     atualizarCampo(num, 'status', el.value);
 }
@@ -373,7 +378,7 @@ async function salvar() {
     const m = document.getElementById("motorista").value.trim();
     if(!p || !m) { alert("PREENCHA PLACA E MOTORISTA!"); return; }
     fecharModal();
-    await fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify({ data: new Date().toISOString(), placa: p.toUpperCase(), motorista: m.toUpperCase(), km: document.getElementById("km").value, tipo: document.getElementById("tipoServico").value, problema: document.getElementById("problema").value.toUpperCase(), status: "ABERTO", responsavel: "", obs: "" }) });
+    await fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify({ data: new Date().toISOString(), placa: p.toUpperCase(), motorista: m.toUpperCase(), km: document.getElementById("km").value, tipo: document.getElementById("tipoServico").value, problema: document.getElementById("problema").value.toUpperCase(), status: "ABERTO", responsavel: "", obs: "", conclusao: "" }) });
     buscarDados();
 }
 
@@ -384,8 +389,8 @@ function gerarRelatorioPDF() {
     doc.setTextColor(255, 255, 255); doc.setFontSize(16); doc.text("CONTROLE DE MANUTENÇÃO - DELLY'S", 15, 15);
     doc.autoTable({ 
         startY: 30, 
-        head: [['OS', 'DATA', 'PLACA', 'MOTORISTA', 'KM', 'SERVIÇO', 'PROBLEMA', 'STATUS', 'RESPONSÁVEL', 'OBS']], 
-        body: getDadosFiltrados().map(x => [x.numero, new Date(x.data).toLocaleDateString('pt-BR'), x.placa, x.motorista, x.km, x.tipo, x.problema, x.status, x.responsavel, x.obs]),
+        head: [['OS', 'DATA', 'PLACA', 'MOTORISTA', 'KM', 'SERVIÇO', 'PROBLEMA', 'RESPONSÁVEL', 'OBS', 'STATUS']], 
+        body: getDadosFiltrados().map(x => [x.numero, new Date(x.data).toLocaleDateString('pt-BR'), x.placa, x.motorista, x.km, x.tipo, x.problema, x.responsavel, x.obs, x.status]),
         styles: { fontSize: 7, textTransform: 'uppercase' },
         headStyles: { fillColor: [30, 41, 59] }
     });
