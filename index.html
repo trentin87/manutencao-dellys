@@ -28,13 +28,29 @@
         background: white;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
         z-index: 20000; font-weight: bold; color: var(--header-bg);
+        transition: opacity 0.4s ease, visibility 0.4s ease;
     }
-    .spinner {
-        width: 50px; height: 50px; border: 5px solid #f3f3f3;
-        border-top: 5px solid var(--header-bg); border-radius: 50%;
-        animation: spin 1s linear infinite; margin-bottom: 15px;
+    
+    .loader-truck-icon {
+        width: 45px; height: 45px; fill: var(--header-bg); margin-bottom: 12px;
+        animation: pulseTruck 1.5s ease-in-out infinite;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes pulseTruck {
+        0%, 100% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .progress-box {
+        width: 280px; height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.15); margin-top: 15px; margin-bottom: 8px; position: relative;
+    }
+    .progress-bar {
+        width: 0%; height: 100%; background: linear-gradient(90deg, #003366, #059669);
+        border-radius: 7px; transition: width 0.2s ease;
+    }
+    .progress-text {
+        font-size: 13px; font-weight: 800; color: #003366;
+    }
 
     header { background: var(--header-bg); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     .header-title { font-size: 22px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
@@ -151,8 +167,12 @@
 <body>
 
 <div id="initial-loader">
-    <div class="spinner"></div>
-    <span>CARREGANDO...</span>
+    <svg class="loader-truck-icon" viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM17 12V9.5h2.5l1.97 2.5H17z"/></svg>
+    <span style="font-size: 14px; letter-spacing: 1px;">CARREGANDO SISTEMA...</span>
+    <div class="progress-box">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div id="progressText" class="progress-text">0%</div>
 </div>
 
 <div id="toast">ATUALIZADO!</div>
@@ -270,6 +290,46 @@ let filaRequisicoes = [];
 let processandoFila = false;
 let requisicoesPendentesPorOS = new Set();
 
+// Controle da Barra de Progresso Percentual
+let progressoAtual = 0;
+let progressInterval = null;
+
+function iniciarAnimacaoProgresso() {
+    progressoAtual = 0;
+    atualizarBarra(0);
+    clearInterval(progressInterval);
+    progressInterval = setInterval(() => {
+        if (progressoAtual < 90) {
+            let passo = (90 - progressoAtual) * 0.12;
+            if (passo < 0.5) passo = 0.5;
+            progressoAtual = Math.min(90, progressoAtual + passo);
+            atualizarBarra(Math.round(progressoAtual));
+        }
+    }, 120);
+}
+
+function atualizarBarra(pct) {
+    const bar = document.getElementById('progressBar');
+    const txt = document.getElementById('progressText');
+    if (bar) bar.style.width = pct + '%';
+    if (txt) txt.innerText = pct + '%';
+}
+
+function finalizarProgresso(callback) {
+    clearInterval(progressInterval);
+    atualizarBarra(100);
+    setTimeout(() => {
+        const loader = document.getElementById('initial-loader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                if (callback) callback();
+            }, 400);
+        }
+    }, 300);
+}
+
 window.onload = () => buscarDados();
 
 function aplicarMascaraPlaca(input) {
@@ -292,6 +352,11 @@ function atualizarSugestoesPlacas() {
 
 async function buscarDados() {
     if (estaAtualizando || filaRequisicoes.length > 0 || processandoFila) return;
+    
+    if (primeiraCarga) {
+        iniciarAnimacaoProgresso();
+    }
+
     try {
         const res = await fetch(URL_GOOGLE);
         const json = await res.json();
@@ -314,7 +379,6 @@ async function buscarDados() {
             const timestampBloqueio = linhasBloqueadas[novoItem.numero];
             const temAlteracaoPendente = requisicoesPendentesPorOS.has(novoItem.numero);
             
-            // Mantém os dados locais intactos se houver alterações na fila ou feitas recentemente
             if (itemLocal && (temAlteracaoPendente || (timestampBloqueio && (agora - timestampBloqueio < 30000)))) {
                 return itemLocal;
             }
@@ -325,8 +389,9 @@ async function buscarDados() {
         console.error("Erro na carga"); 
     } finally {
         if (primeiraCarga) {
-            document.getElementById('initial-loader').style.display = 'none';
-            primeiraCarga = false;
+            finalizarProgresso(() => {
+                primeiraCarga = false;
+            });
         }
     }
 }
@@ -440,7 +505,6 @@ function atualizarCampo(num, campo, valor) {
         linhasBloqueadas[num] = Date.now();
         requisicoesPendentesPorOS.add(num);
 
-        // Se alterou o status ou tipo, ajusta os contadores sem reconstruir os campos e perder o foco
         if(campo === 'status' || campo === 'tipo') {
             const dadosPeriodo = getDadosPorPeriodo();
             const c = { 'ABERTO':0, 'EM ANDAMENTO':0, 'AGUARDANDO PEÇA':0, 'FINALIZADO':0 };
@@ -457,7 +521,6 @@ function atualizarCampo(num, campo, valor) {
         }
     }
 
-    // Adiciona na fila sequencial de envio
     filaRequisicoes.push({
         numero: num,
         payload: { action: "update", numero: num, [campo]: valUpper }
