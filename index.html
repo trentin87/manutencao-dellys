@@ -265,6 +265,11 @@ let primeiraCarga = true;
 let estaAtualizando = false;
 let linhasBloqueadas = {};
 
+// Controle de Fila Sequencial para salvar alterações rapidamente sem perder nada
+let filaRequisicoes = [];
+let processandoFila = false;
+let requisicoesPendentesPorOS = new Set();
+
 window.onload = () => buscarDados();
 
 function aplicarMascaraPlaca(input) {
@@ -286,7 +291,7 @@ function atualizarSugestoesPlacas() {
 }
 
 async function buscarDados() {
-    if (estaAtualizando) return;
+    if (estaAtualizando || filaRequisicoes.length > 0 || processandoFila) return;
     try {
         const res = await fetch(URL_GOOGLE);
         const json = await res.json();
@@ -307,7 +312,12 @@ async function buscarDados() {
         banco = novosDados.map(novoItem => {
             const itemLocal = banco.find(b => b.numero == novoItem.numero);
             const timestampBloqueio = linhasBloqueadas[novoItem.numero];
-            if (itemLocal && timestampBloqueio && (agora - timestampBloqueio < 15000)) return itemLocal;
+            const temAlteracaoPendente = requisicoesPendentesPorOS.has(novoItem.numero);
+            
+            // Mantém os dados locais intactos se houver alterações na fila ou feitas recentemente
+            if (itemLocal && (temAlteracaoPendente || (timestampBloqueio && (agora - timestampBloqueio < 30000)))) {
+                return itemLocal;
+            }
             return novoItem;
         });
         atualizarInterface();
@@ -421,22 +431,66 @@ function confirmarStatus(el, num, statusAnterior) {
     atualizarCampo(num, 'status', el.value);
 }
 
-async function atualizarCampo(num, campo, valor) {
+function atualizarCampo(num, campo, valor) {
     const item = banco.find(x => x.numero == num);
+    const valUpper = valor.toUpperCase();
+
     if(item) {
-        estaAtualizando = true; 
-        item[campo] = valor.toUpperCase();
+        item[campo] = valUpper;
         linhasBloqueadas[num] = Date.now();
-        if(campo === 'status' || campo === 'tipo') { atualizarInterface(); }
+        requisicoesPendentesPorOS.add(num);
+
+        // Se alterou o status ou tipo, ajusta os contadores sem reconstruir os campos e perder o foco
+        if(campo === 'status' || campo === 'tipo') {
+            const dadosPeriodo = getDadosPorPeriodo();
+            const c = { 'ABERTO':0, 'EM ANDAMENTO':0, 'AGUARDANDO PEÇA':0, 'FINALIZADO':0 };
+            dadosPeriodo.forEach(x => { if(c.hasOwnProperty(x.status)) c[x.status]++; });
+            document.getElementById('countTotal').innerText = dadosPeriodo.length;
+            document.getElementById('countAberto').innerText = c['ABERTO'];
+            document.getElementById('countAndamento').innerText = c['EM ANDAMENTO'];
+            document.getElementById('countAguardando').innerText = c['AGUARDANDO PEÇA'];
+            document.getElementById('countFinalizado').innerText = c['FINALIZADO'];
+
+            if(telaAtiva === 'editar' && campo === 'status' && valUpper === 'FINALIZADO') {
+                filtrarTudoInstantaneo();
+            }
+        }
     }
-    try {
-        await fetch(URL_GOOGLE, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: "update", numero: num, [campo]: valor.toUpperCase() }) 
-        });
-        showToast(num);
-    } catch (e) { console.error("Erro na sincronização"); }
-    finally { estaAtualizando = false; }
+
+    // Adiciona na fila sequencial de envio
+    filaRequisicoes.push({
+        numero: num,
+        payload: { action: "update", numero: num, [campo]: valUpper }
+    });
+
+    processarFila();
+}
+
+async function processarFila() {
+    if (processandoFila) return;
+    processandoFila = true;
+    estaAtualizando = true;
+
+    while (filaRequisicoes.length > 0) {
+        const req = filaRequisicoes[0];
+        try {
+            await fetch(URL_GOOGLE, { 
+                method: 'POST', 
+                body: JSON.stringify(req.payload) 
+            });
+            showToast(req.numero);
+        } catch (e) {
+            console.error("Erro na sincronização:", e);
+        } finally {
+            filaRequisicoes.shift();
+            if (!filaRequisicoes.some(r => r.numero === req.numero)) {
+                requisicoesPendentesPorOS.delete(req.numero);
+            }
+        }
+    }
+
+    processandoFila = false;
+    estaAtualizando = false;
 }
 
 function adicionarLinhaServico() {
@@ -574,7 +628,7 @@ function showToast(numeroOS) {
 setInterval(() => {
     const busca = document.getElementById("txt-search");
     const modal = document.getElementById("modalOS");
-    if (document.activeElement !== busca && modal.style.display !== "flex" && !estaAtualizando) {
+    if (document.activeElement !== busca && modal.style.display !== "flex" && !estaAtualizando && filaRequisicoes.length === 0) {
         buscarDados();
     }
 }, 30000); 
