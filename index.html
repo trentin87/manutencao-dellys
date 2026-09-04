@@ -16,6 +16,13 @@
         --andamento: #fef9c3; --andamento-text: #854d0e; --andamento-border: #eab308;
         --aguardando: #ffedd5; --aguardando-text: #9a3412; --aguardando-border: #f97316;
         --finalizado: #dcfce7; --finalizado-text: #166534; --finalizado-border: #22c55e;
+        
+        --mecanico-bg: #fee2e2; --mecanico-text: #991b1b; --mecanico-border: #ef4444;
+        --eletrico-bg: #fef3c7; --eletrico-text: #92400e; --eletrico-border: #eab308;
+        --refrigeracao-bg: #dbeafe; --refrigeracao-text: #1e40af; --refrigeracao-border: #3b82f6;
+        --lavagem-bg: #f3e8ff; --lavagem-text: #6b21a8; --lavagem-border: #a855f7;
+        --outros-bg: #f4f4f5; --outros-text: #3f3f46; --outros-border: #71717a;
+
         --header-bg: #003366; 
         --btn-add-bg: #059669; --btn-pdf: #dc2626; --btn-xls: #15803d;
         --zebra-bg: #e2e8f0;
@@ -58,12 +65,33 @@
     .logo-img { height: 35px; filter: brightness(0) invert(1); }
     
     .dashboard { display: flex; background: #fff; border-bottom: 1px solid #cbd5e1; padding: 5px 0; overflow-x: auto; }
-    .dash-card { flex: 1; min-width: 100px; text-align: center; border-right: 1px solid #eee; padding: 5px; }
-    .dash-card .label { font-size: 9px; font-weight: bold; color: #64748b; display: block; }
+    .dash-card { flex: 1; min-width: 100px; text-align: center; border-right: 1px solid #eee; padding: 6px 4px; transition: all 0.3s ease; }
+    .dash-card .label { font-size: 9px; font-weight: bold; color: #64748b; display: block; margin-bottom: 2px; }
     .dash-card .val { font-size: 16px; font-weight: 900; }
 
+    /* Estilização colorida dinâmica dos Cards do Dashboard por STATUS */
+    .dash-card.card-ABERTO { background-color: var(--aberto); border-bottom: 4px solid var(--aberto-border); }
+    .dash-card.card-ABERTO .label { color: var(--aberto-text); }
+    .dash-card.card-EM-ANDAMENTO { background-color: var(--andamento); border-bottom: 4px solid var(--andamento-border); }
+    .dash-card.card-EM-ANDAMENTO .label { color: var(--andamento-text); }
+    .dash-card.card-AGUARDANDO-PEÇA { background-color: var(--aguardando); border-bottom: 4px solid var(--aguardando-border); }
+    .dash-card.card-AGUARDANDO-PEÇA .label { color: var(--aguardando-text); }
+    .dash-card.card-FINALIZADO { background-color: var(--finalizado); border-bottom: 4px solid var(--finalizado-border); }
+    .dash-card.card-FINALIZADO .label { color: var(--finalizado-text); }
+
+    /* Estilização colorida dinâmica dos Cards do Dashboard por SERVIÇO */
+    .dash-card.card-MECÂNICO { background-color: var(--mecanico-bg); border-bottom: 4px solid var(--mecanico-border); }
+    .dash-card.card-MECÂNICO .label { color: var(--mecanico-text); }
+    .dash-card.card-ELÉTRICO { background-color: var(--eletrico-bg); border-bottom: 4px solid var(--eletrico-border); }
+    .dash-card.card-ELÉTRICO .label { color: var(--eletrico-text); }
+    .dash-card.card-REFRIGERAÇÃO { background-color: var(--refrigeracao-bg); border-bottom: 4px solid var(--refrigeracao-border); }
+    .dash-card.card-REFRIGERAÇÃO .label { color: var(--refrigeracao-text); }
+    .dash-card.card-LAVAGEM { background-color: var(--lavagem-bg); border-bottom: 4px solid var(--lavagem-border); }
+    .dash-card.card-LAVAGEM .label { color: var(--lavagem-text); }
+    .dash-card.card-OUTROS { background-color: var(--outros-bg); border-bottom: 4px solid var(--outros-border); }
+    .dash-card.card-OUTROS .label { color: var(--outros-text); }
+
     .filter-bar { background: #fff; padding: 10px 20px; display: flex; gap: 8px; border-bottom: 1px solid #cbd5e1; align-items: center; overflow-x: auto; }
-    body.modo-oficina-active .filter-bar, body.modo-oficina-active .pagination { display: none !important; }
 
     .btn-fx { border: none; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; white-space: nowrap; }
     .btn-fx:hover { opacity: 0.85; filter: brightness(1.1); }
@@ -123,11 +151,11 @@
 
     tbody tr:nth-child(even) { background-color: var(--zebra-bg); }
 
-    .serv-MECÂNICO { background-color: #fee2e2 !important; color: #991b1b; font-weight: bold; border-left: 6px solid #ef4444 !important; }
-    .serv-ELÉTRICO { background-color: #fef3c7 !important; color: #92400e; font-weight: bold; border-left: 6px solid #eab308 !important; }
-    .serv-REFRIGERAÇÃO { background-color: #dbeafe !important; color: #1e40af; font-weight: bold; border-left: 6px solid #3b82f6 !important; }
-    .serv-LAVAGEM { background-color: #f3e8ff !important; color: #6b21a8; font-weight: bold; border-left: 6px solid #a855f7 !important; }
-    .serv-OUTROS { background-color: #f4f4f5 !important; color: #3f3f46; font-weight: bold; border-left: 6px solid #71717a !important; }
+    .serv-MECÂNICO { background-color: var(--mecanico-bg) !important; color: var(--mecanico-text); font-weight: bold; border-left: 6px solid var(--mecanico-border) !important; }
+    .serv-ELÉTRICO { background-color: var(--eletrico-bg) !important; color: var(--eletrico-text); font-weight: bold; border-left: 6px solid var(--eletrico-border) !important; }
+    .serv-REFRIGERAÇÃO { background-color: var(--refrigeracao-bg) !important; color: var(--refrigeracao-text); font-weight: bold; border-left: 6px solid var(--refrigeracao-border) !important; }
+    .serv-LAVAGEM { background-color: var(--lavagem-bg) !important; color: var(--lavagem-text); font-weight: bold; border-left: 6px solid var(--lavagem-border) !important; }
+    .serv-OUTROS { background-color: var(--outros-bg) !important; color: var(--outros-text); font-weight: bold; border-left: 6px solid var(--outros-border) !important; }
 
     .cell-ABERTO { background-color: var(--aberto) !important; color: var(--aberto-text); font-weight: 900; border-left: 6px solid var(--aberto-border) !important; }
     .cell-EM-ANDAMENTO { background-color: var(--andamento) !important; color: var(--andamento-text); font-weight: 900; border-left: 6px solid var(--andamento-border) !important; }
@@ -156,11 +184,21 @@
     #toast { position: fixed; top: 20px; right: 20px; background: #059669; color: white; padding: 12px 24px; border-radius: 4px; display: none; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     .hidden { display: none; }
 
+    /* Layout responsivo dos campos do Modal */
+    .form-grid-top {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
     @media (max-width: 768px) {
         header { padding: 10px; flex-direction: column; gap: 10px; }
         .header-title { font-size: 14px; }
         .logo-img { height: 25px; }
         #txt-search { width: 100% !important; }
+        .form-grid-top { grid-template-columns: 1fr; }
+        .modal-box { width: 92% !important; }
     }
 </style>
 </head>
@@ -185,21 +223,21 @@
     <img src="https://www.dellys.com.br/ccstore/v1/images/?source=/file/v4051494612781080437/general/Logo_10_png.png" class="logo-img">
 </header>
 
-<div class="dashboard">
-    <div class="dash-card"><span class="label">TOTAL NO PERÍODO</span><span class="val" id="countTotal">0</span></div>
-    <div class="dash-card"><span class="label">ABERTOS</span><span class="val" id="countAberto" style="color:#ef4444">0</span></div>
-    <div class="dash-card"><span class="label">EM ANDAMENTO</span><span class="val" id="countAndamento" style="color:#eab308">0</span></div>
-    <div class="dash-card"><span class="label">AGUARDANDO PEÇA</span><span class="val" id="countAguardando" style="color:#f97316">0</span></div>
-    <div class="dash-card"><span class="label">FINALIZADOS</span><span class="val" id="countFinalizado" style="color:#22c55e">0</span></div>
+<div class="dashboard" id="dashboardContainer">
+    <div class="dash-card" id="card1"><span class="label" id="dashLabel1">ABERTO</span><span class="val" id="count1">0</span></div>
+    <div class="dash-card" id="card2"><span class="label" id="dashLabel2">EM ANDAMENTO</span><span class="val" id="count2">0</span></div>
+    <div class="dash-card" id="card3"><span class="label" id="dashLabel3">AGUARDANDO PEÇA</span><span class="val" id="count3">0</span></div>
+    <div class="dash-card" id="card4"><span class="label" id="dashLabel4">FINALIZADO</span><span class="val" id="count4">0</span></div>
+    <div class="dash-card" id="card5"><span class="label" id="dashLabel5">TOTAL</span><span class="val" id="count5">0</span></div>
 </div>
 
-<div class="filter-bar">
+<div class="filter-bar" id="filterBarContainer">
     <button class="btn-fx btn-filter active" data-status="TODOS" onclick="setFiltroStatus('TODOS')">TODOS</button>
     <button class="btn-fx btn-filter" data-status="ABERTO" onclick="setFiltroStatus('ABERTO')">ABERTO</button>
     <button class="btn-fx btn-filter" data-status="EM ANDAMENTO" onclick="setFiltroStatus('EM ANDAMENTO')">EM ANDAMENTO</button>
     <button class="btn-fx btn-filter" data-status="AGUARDANDO PEÇA" onclick="setFiltroStatus('AGUARDANDO PEÇA')">AGUARDANDO PEÇA</button>
     <button class="btn-fx btn-filter" data-status="FINALIZADO" onclick="setFiltroStatus('FINALIZADO')">FINALIZADO</button>
-    
+
     <div style="margin-left: auto; display: flex; gap: 8px;">
         <select id="filtroPeriodo" onchange="atualizarInterface()" style="padding: 6px; font-weight: bold; border-radius:4px; border:1px solid #cbd5e1; cursor: pointer;">
             <option value="7" selected>ÚLTIMOS 7 DIAS</option>
@@ -256,21 +294,33 @@
 </div>
 
 <div id="modalOS" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9999;">
-    <div class="modal-box" style="background: white; padding: 25px; border-radius: 8px; width: 450px; max-height: 95vh; overflow-y: auto; box-sizing: border-box;">
-        <h3 style="margin-top:0; border-bottom: 2px solid var(--btn-add-bg); padding-bottom: 8px; color: var(--btn-add-bg)">Nova Ordem de Serviço</h3>
+    <div class="modal-box" style="background: white; padding: 25px; border-radius: 8px; width: 680px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <h3 style="margin-top:0; border-bottom: 2px solid var(--btn-add-bg); padding-bottom: 8px; color: var(--btn-add-bg); font-size: 16px;">Nova Ordem de Serviço</h3>
         
-        <input id="placa" list="listaPlacas" placeholder="PLACA (EX: ABC1234)" maxlength="7" oninput="aplicarMascaraPlaca(this)" style="width:100%; padding:10px; margin:8px 0; border:1px solid #cbd5e1; text-transform:uppercase; font-weight: bold;">
-        <datalist id="listaPlacas"></datalist>
+        <div class="form-grid-top">
+            <div>
+                <label style="font-weight: bold; font-size: 10px; color: #475569; display: block; margin-bottom: 2px;">PLACA</label>
+                <input id="placa" list="listaPlacas" placeholder="ABC1234" maxlength="7" oninput="aplicarMascaraPlaca(this)" style="width:100%; padding:9px; border:1px solid #cbd5e1; text-transform:uppercase; font-weight: bold; box-sizing: border-box;">
+                <datalist id="listaPlacas"></datalist>
+            </div>
+            <div>
+                <label style="font-weight: bold; font-size: 10px; color: #475569; display: block; margin-bottom: 2px;">MOTORISTA</label>
+                <input id="motorista" placeholder="NOME DO MOTORISTA" style="width:100%; padding:9px; border:1px solid #cbd5e1; text-transform:uppercase; box-sizing: border-box;">
+            </div>
+            <div>
+                <label style="font-weight: bold; font-size: 10px; color: #475569; display: block; margin-bottom: 2px;">KM ATUAL</label>
+                <input id="km" type="number" placeholder="000000" style="width:100%; padding:9px; border:1px solid #cbd5e1; box-sizing: border-box;">
+            </div>
+        </div>
         
-        <input id="motorista" placeholder="MOTORISTA" style="width:100%; padding:10px; margin:8px 0; border:1px solid #cbd5e1; text-transform:uppercase;">
-        <input id="km" type="number" placeholder="KM ATUAL" style="width:100%; padding:10px; margin:8px 0; border:1px solid #cbd5e1;">
+        <div id="containerServicos" style="margin-top: 15px; max-height: 350px; overflow-y: auto; padding-right: 5px;"></div>
         
-        <div id="containerServicos" style="margin-top: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px;"></div>
+        <button type="button" class="btn-fx" onclick="adicionarLinhaServico()" style="background: #3b82f6; color: white; width: 100%; padding: 10px; margin: 12px 0; font-size: 11px;">+ ADICIONAR OUTRO SERVIÇO / PROBLEMA</button>
         
-        <button type="button" class="btn-fx" onclick="adicionarLinhaServico()" style="background: #3b82f6; color: white; width: 100%; padding: 8px; margin: 10px 0; font-size: 10px;">+ ADICIONAR OUTRO SERVIÇO / PROBLEMA</button>
-        
-        <button class="btn-fx btn-add" style="width:100%; padding: 12px; margin-top:10px" onclick="salvar()">GRAVAR OS</button>
-        <button class="btn-fx" style="width:100%; margin-top:10px; border:none; background:transparent; cursor:pointer;" onclick="fecharModal()">CANCELAR</button>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-fx btn-add" style="flex: 2; padding: 12px;" onclick="salvar()">GRAVAR OS</button>
+            <button class="btn-fx" style="flex: 1; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569;" onclick="fecharModal()">CANCELAR</button>
+        </div>
     </div>
 </div>
 
@@ -398,15 +448,99 @@ async function buscarDados() {
 
 function atualizarInterface() {
     paginaAtual = 1;
-    const dadosPeriodo = getDadosPorPeriodo();
-    const c = { 'ABERTO':0, 'EM ANDAMENTO':0, 'AGUARDANDO PEÇA':0, 'FINALIZADO':0 };
-    dadosPeriodo.forEach(x => { if(c.hasOwnProperty(x.status)) c[x.status]++; });
-    document.getElementById('countTotal').innerText = dadosPeriodo.length;
-    document.getElementById('countAberto').innerText = c['ABERTO'];
-    document.getElementById('countAndamento').innerText = c['EM ANDAMENTO'];
-    document.getElementById('countAguardando').innerText = c['AGUARDANDO PEÇA'];
-    document.getElementById('countFinalizado').innerText = c['FINALIZADO'];
-    document.body.classList.toggle('modo-oficina-active', telaAtiva === 'editar');
+    
+    // Esconde a barra de filtros inteira quando estiver no Modo Oficina
+    const filterBar = document.getElementById('filterBarContainer');
+    if (filterBar) {
+        filterBar.classList.toggle('hidden', telaAtiva === 'editar');
+    }
+
+    const card1 = document.getElementById('card1');
+    const card2 = document.getElementById('card2');
+    const card3 = document.getElementById('card3');
+    const card4 = document.getElementById('card4');
+    const card5 = document.getElementById('card5');
+
+    if (telaAtiva === 'consulta') {
+        // MODO CONSULTA: Dashboard mostra STATUS com as cores correspondentes de cada status
+        const dadosBase = getDadosPorPeriodo();
+        const countStatus = { 'ABERTO': 0, 'EM ANDAMENTO': 0, 'AGUARDANDO PEÇA': 0, 'FINALIZADO': 0 };
+        
+        dadosBase.forEach(x => {
+            const st = x.status ? x.status.toUpperCase() : 'ABERTO';
+            if (countStatus.hasOwnProperty(st)) {
+                countStatus[st]++;
+            } else {
+                countStatus['ABERTO']++;
+            }
+        });
+
+        card1.className = 'dash-card card-ABERTO';
+        card2.className = 'dash-card card-EM-ANDAMENTO';
+        card3.className = 'dash-card card-AGUARDANDO-PEÇA';
+        card4.className = 'dash-card card-FINALIZADO';
+        card5.className = 'dash-card';
+
+        document.getElementById('dashLabel1').innerText = "ABERTO";
+        document.getElementById('count1').innerText = countStatus['ABERTO'];
+        document.getElementById('count1').style.color = "var(--aberto-text)";
+
+        document.getElementById('dashLabel2').innerText = "EM ANDAMENTO";
+        document.getElementById('count2').innerText = countStatus['EM ANDAMENTO'];
+        document.getElementById('count2').style.color = "var(--andamento-text)";
+
+        document.getElementById('dashLabel3').innerText = "AGUARDANDO PEÇA";
+        document.getElementById('count3').innerText = countStatus['AGUARDANDO PEÇA'];
+        document.getElementById('count3').style.color = "var(--aguardando-text)";
+
+        document.getElementById('dashLabel4').innerText = "FINALIZADO";
+        document.getElementById('count4').innerText = countStatus['FINALIZADO'];
+        document.getElementById('count4').style.color = "var(--finalizado-text)";
+
+        document.getElementById('dashLabel5').innerText = "TOTAL";
+        document.getElementById('count5').innerText = dadosBase.length;
+        document.getElementById('count5').style.color = "#1e293b";
+    } else {
+        // MODO OFICINA: Dashboard mostra TIPOS DE SERVIÇO com as cores correspondentes de cada serviço
+        const dadosBase = banco.filter(x => x.status !== 'FINALIZADO');
+        const countTipos = { 'MECÂNICO': 0, 'ELÉTRICO': 0, 'REFRIGERAÇÃO': 0, 'LAVAGEM': 0, 'OUTROS': 0 };
+        
+        dadosBase.forEach(x => {
+            const t = x.tipo ? x.tipo.toUpperCase() : 'OUTROS';
+            if (countTipos.hasOwnProperty(t)) {
+                countTipos[t]++;
+            } else {
+                countTipos['OUTROS']++;
+            }
+        });
+
+        card1.className = 'dash-card card-MECÂNICO';
+        card2.className = 'dash-card card-ELÉTRICO';
+        card3.className = 'dash-card card-REFRIGERAÇÃO';
+        card4.className = 'dash-card card-LAVAGEM';
+        card5.className = 'dash-card card-OUTROS';
+
+        document.getElementById('dashLabel1').innerText = "MECÂNICO";
+        document.getElementById('count1').innerText = countTipos['MECÂNICO'];
+        document.getElementById('count1').style.color = "var(--mecanico-text)";
+
+        document.getElementById('dashLabel2').innerText = "ELÉTRICO";
+        document.getElementById('count2').innerText = countTipos['ELÉTRICO'];
+        document.getElementById('count2').style.color = "var(--eletrico-text)";
+
+        document.getElementById('dashLabel3').innerText = "REFRIGERAÇÃO";
+        document.getElementById('count3').innerText = countTipos['REFRIGERAÇÃO'];
+        document.getElementById('count3').style.color = "var(--refrigeracao-text)";
+
+        document.getElementById('dashLabel4').innerText = "LAVAGEM";
+        document.getElementById('count4').innerText = countTipos['LAVAGEM'];
+        document.getElementById('count4').style.color = "var(--lavagem-text)";
+
+        document.getElementById('dashLabel5').innerText = "OUTROS";
+        document.getElementById('count5').innerText = countTipos['OUTROS'];
+        document.getElementById('count5').style.color = "var(--outros-text)";
+    }
+
     filtrarTudoInstantaneo();
 }
 
@@ -420,11 +554,13 @@ function getDadosPorPeriodo() {
 function getDadosFiltrados() {
     const busca = document.getElementById("txt-search").value.toLowerCase();
     let dados = getDadosPorPeriodo();
+    
     if (telaAtiva === 'editar') { 
         dados = banco.filter(x => x.status !== 'FINALIZADO'); 
     } else { 
         if (filtroStatusAtivo !== 'TODOS') dados = dados.filter(x => x.status === filtroStatusAtivo); 
     }
+
     return dados.filter(x => x.placa.toLowerCase().includes(busca) || x.motorista.toLowerCase().includes(busca)).reverse();
 }
 
@@ -443,14 +579,17 @@ function renderTables(dados) {
     if (telaAtiva === 'consulta') {
         tbC.innerHTML = paginados.map(x => {
             const balao = x.status === 'FINALIZADO' && x.conclusao ? `title="FINALIZADO EM: ${new Date(x.conclusao).toLocaleString('pt-BR')}"` : '';
+            const statusClass = "cell-" + x.status.replace(/\s/g, "-");
+            const servicoClass = "serv-" + x.tipo.replace(/\s/g, "-");
+
             return `<tr>
                 <td>${x.numero}</td><td>${new Date(x.data).toLocaleString('pt-BR')}</td>
                 <td><b>${x.placa}</b></td><td><div class="wrap-text">${x.motorista}</div></td><td>${x.km}</td>
-                <td class="serv-${x.tipo.replace(/\s/g, "-")}">${x.tipo}</td>
+                <td class="${servicoClass}">${x.tipo}</td>
                 <td><div class="wrap-text">${x.problema}</div></td>
                 <td><div class="wrap-text">${x.responsavel}</div></td>
                 <td><div class="wrap-text">${x.obs}</div></td>
-                <td class="cell-${x.status.replace(/\s/g, "-")}" ${balao}>${x.status}</td>
+                <td class="${statusClass}" ${balao}>${x.status}</td>
             </tr>`}).join('');
     } else {
         if (dados.length === 0) {
@@ -506,18 +645,7 @@ function atualizarCampo(num, campo, valor) {
         requisicoesPendentesPorOS.add(num);
 
         if(campo === 'status' || campo === 'tipo') {
-            const dadosPeriodo = getDadosPorPeriodo();
-            const c = { 'ABERTO':0, 'EM ANDAMENTO':0, 'AGUARDANDO PEÇA':0, 'FINALIZADO':0 };
-            dadosPeriodo.forEach(x => { if(c.hasOwnProperty(x.status)) c[x.status]++; });
-            document.getElementById('countTotal').innerText = dadosPeriodo.length;
-            document.getElementById('countAberto').innerText = c['ABERTO'];
-            document.getElementById('countAndamento').innerText = c['EM ANDAMENTO'];
-            document.getElementById('countAguardando').innerText = c['AGUARDANDO PEÇA'];
-            document.getElementById('countFinalizado').innerText = c['FINALIZADO'];
-
-            if(telaAtiva === 'editar' && campo === 'status' && valUpper === 'FINALIZADO') {
-                filtrarTudoInstantaneo();
-            }
+            atualizarInterface();
         }
     }
 
@@ -561,26 +689,24 @@ function adicionarLinhaServico() {
     const div = document.createElement('div');
     div.className = 'linha-servico-item';
     div.style.border = "1px dashed #cbd5e1";
-    div.style.padding = "8px";
-    div.style.borderRadius = "4px";
+    div.style.padding = "10px";
+    div.style.borderRadius = "6px";
     div.style.marginBottom = "10px";
     div.style.background = "#f8fafc";
     div.style.display = "flex";
-    div.style.gap = "8px";
-    div.style.alignItems = "flex-start";
+    div.style.gap = "10px";
+    div.style.alignItems = "center";
     
     div.innerHTML = `
-        <div style="flex: 1;">
-            <select class="tipo-servico-item" style="width:100%; padding:8px; margin-bottom:5px; border:1px solid #cbd5e1; cursor:pointer; font-size:10px; font-weight: bold;">
-                <option value="MECÂNICO">MECÂNICO</option>
-                <option value="ELÉTRICO">ELÉTRICO</option>
-                <option value="REFRIGERAÇÃO">REFRIGERAÇÃO</option>
-                <option value="LAVAGEM">LAVAGEM</option>
-                <option value="OUTROS" selected>OUTROS</option>
-            </select>
-            <textarea class="problema-item" placeholder="DESCREVA O PROBLEMA..." rows="2" style="width:100%; padding:8px; border:1px solid #cbd5e1; text-transform:uppercase; font-size:10px; font-family: inherit; box-sizing: border-box;"></textarea>
-        </div>
-        <button type="button" onclick="this.parentElement.remove()" style="background:#dc2626; color:white; border:none; padding:6px 10px; cursor:pointer; border-radius:4px; font-weight:bold; font-size:10px;">X</button>
+        <select class="tipo-servico-item" style="width: 140px; padding: 8px; border: 1px solid #cbd5e1; cursor: pointer; font-size: 10px; font-weight: bold; border-radius: 4px;">
+            <option value="MECÂNICO">MECÂNICO</option>
+            <option value="ELÉTRICO">ELÉTRICO</option>
+            <option value="REFRIGERAÇÃO">REFRIGERAÇÃO</option>
+            <option value="LAVAGEM">LAVAGEM</option>
+            <option value="OUTROS" selected>OUTROS</option>
+        </select>
+        <textarea class="problema-item" placeholder="DESCREVA O PROBLEMA..." rows="2" style="flex: 1; padding: 8px; border: 1px solid #cbd5e1; text-transform: uppercase; font-size: 10px; font-family: inherit; box-sizing: border-box; border-radius: 4px; resize: vertical;"></textarea>
+        <button type="button" onclick="this.parentElement.remove()" style="background: #dc2626; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 11px;">X</button>
     `;
     container.appendChild(div);
 }
@@ -654,8 +780,22 @@ function gerarExcel() {
     XLSX.writeFile(wb, "Controle_Manutencao.xlsx");
 }
 
-function setFiltroStatus(st) { filtroStatusAtivo = st; document.querySelectorAll('.btn-filter').forEach(b => b.classList.toggle('active', b.getAttribute('data-status') === st)); paginaAtual = 1; atualizarInterface(); }
-function tela(id) { telaAtiva = id; document.getElementById('consulta').classList.toggle('hidden', id !== 'consulta'); document.getElementById('editar').classList.toggle('hidden', id !== 'editar'); document.getElementById('nav-consulta').classList.toggle('active', id === 'consulta'); document.getElementById('nav-editar').classList.toggle('active', id === 'editar'); paginaAtual = 1; atualizarInterface(); }
+function setFiltroStatus(st) { 
+    filtroStatusAtivo = st; 
+    document.querySelectorAll('.btn-filter').forEach(b => b.classList.toggle('active', b.getAttribute('data-status') === st)); 
+    paginaAtual = 1; 
+    atualizarInterface(); 
+}
+
+function tela(id) { 
+    telaAtiva = id; 
+    document.getElementById('consulta').classList.toggle('hidden', id !== 'consulta'); 
+    document.getElementById('editar').classList.toggle('hidden', id !== 'editar'); 
+    document.getElementById('nav-consulta').classList.toggle('active', id === 'consulta'); 
+    document.getElementById('nav-editar').classList.toggle('active', id === 'editar'); 
+    paginaAtual = 1; 
+    atualizarInterface(); 
+}
 
 function paginar(acao) { 
     const totalP = Math.ceil(getDadosFiltrados().length / itensPorPagina) || 1; 
